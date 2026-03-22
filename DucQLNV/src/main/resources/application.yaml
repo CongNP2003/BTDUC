@@ -1,0 +1,17 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: DucQLNV-service
+  datasource:
+    url: "jdbc:mysql://localhost:3307/DucQLNV"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

@@ -1,5 +1,6 @@
-package com.example.DucQLNV.dto.request;
+package com.example.DucQLNV.dto.respone;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRequest {
+public class UserRespone {
+    String id;
     String username;
-    String password;
     String role;
 }

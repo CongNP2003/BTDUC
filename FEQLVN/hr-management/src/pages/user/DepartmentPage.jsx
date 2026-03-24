@@ -8,7 +8,6 @@ import {
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
-/* ─── Pagination ─── */
 function Pagination({ page, totalPages, onPage }) {
   if (totalPages <= 1) return null;
   const pages = [];
@@ -28,127 +27,10 @@ function Pagination({ page, totalPages, onPage }) {
   );
 }
 
-/* ─── Department Modal ─── */
-function DepartmentModal({ mode, initial, onClose, onSaved }) {
-  const [name, setName] = useState(initial?.name || "");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const isEdit = mode === "edit";
-
-  const handleSubmit = async () => {
-    if (!name.trim()) {
-      setError("Tên phòng ban không được để trống");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      if (isEdit) {
-        await updateDepartment(initial.id, { name: name.trim() });
-      } else {
-        await createDepartment({ name: name.trim() });
-      }
-      onSaved();
-    } catch {
-      setError("Có lỗi xảy ra, vui lòng thử lại");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-      <>
-        <div className="modal-backdrop" onClick={onClose} />
-        <div className="modal-box" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <div className="modal-title">
-              {isEdit ? "Chỉnh sửa phòng ban" : "Thêm phòng ban mới"}
-            </div>
-            <button className="modal-close" onClick={onClose}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
-          </div>
-          <div className="modal-body">
-            <label className="field-label">Tên phòng ban</label>
-            <input
-                className={`field-input ${error ? "field-input--error" : ""}`}
-                placeholder="Nhập tên phòng ban..."
-                value={name}
-                onChange={(e) => { setName(e.target.value); setError(""); }}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                autoFocus
-            />
-            {error && <div className="field-error">{error}</div>}
-          </div>
-          <div className="modal-footer">
-            <button className="btn-cancel" onClick={onClose} disabled={loading}>Hủy</button>
-            <button className="btn-confirm" onClick={handleSubmit} disabled={loading}>
-              {loading ? <span className="btn-spinner" /> : isEdit ? "Lưu thay đổi" : "Thêm phòng ban"}
-            </button>
-          </div>
-        </div>
-      </>
-  );
-}
-
-/* ─── Confirm Delete ─── */
-function ConfirmDelete({ dep, onClose, onDeleted }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleDelete = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await deleteDepartment(dep.id);
-      onDeleted();
-    } catch {
-      setError("Xóa thất bại, vui lòng thử lại");
-      setLoading(false);
-    }
-  };
-
-  return (
-      <>
-        <div className="modal-backdrop" onClick={onClose} />
-        <div className="modal-box modal-box--sm" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <div className="modal-title">Xác nhận xóa</div>
-            <button className="modal-close" onClick={onClose}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="confirm-icon">🗑️</div>
-            <div className="confirm-msg">
-              Bạn có chắc muốn xóa phòng ban <strong>"{dep.name}"</strong> không?
-              <br />
-              <span style={{ fontSize: 13, color: "#94afc8" }}>Hành động này không thể hoàn tác.</span>
-            </div>
-            {error && <div className="field-error" style={{ marginTop: 10, textAlign: "center" }}>{error}</div>}
-          </div>
-          <div className="modal-footer">
-            <button className="btn-cancel" onClick={onClose} disabled={loading}>Hủy</button>
-            <button className="btn-danger" onClick={handleDelete} disabled={loading}>
-              {loading ? <span className="btn-spinner" /> : "Xóa phòng ban"}
-            </button>
-          </div>
-        </div>
-      </>
-  );
-}
-
-/* ─── Main Page ─── */
 function DepartmentPage() {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [modal, setModal] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -213,11 +95,6 @@ function DepartmentPage() {
         .dep-search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #e0edf8; border: none; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #5a85ab; font-size: 12px; line-height: 1; }
         .dep-page-size-select { padding: 8px 12px; border: 1.5px solid #d6e8f7; border-radius: 9px; background: #f8fcff; color: #5a85ab; font-size: 13px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; outline: none; }
 
-        /* Add button */
-        .btn-add { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #1e88e5, #1565c0); color: #fff; border: none; border-radius: 11px; padding: 11px 22px; font-size: 14px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(21,101,192,0.28); transition: all 0.18s ease; white-space: nowrap; }
-        .btn-add:hover { filter: brightness(1.07); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(21,101,192,0.36); }
-        .btn-add:active { transform: translateY(0); }
-
         /* Table card */
         .dep-card { background: #fff; border-radius: 18px; border: 1px solid #e2edf8; box-shadow: 0 4px 20px rgba(21,101,192,0.07); overflow: hidden; }
 
@@ -233,11 +110,7 @@ function DepartmentPage() {
         .dep-name-cell { display: flex; align-items: center; gap: 10px; }
         .dep-name-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #1976d2; flex-shrink: 0; }
         .dep-name { font-weight: 600; color: #0d2137; font-size: 14.5px; }
-        .action-wrap { display: flex; gap: 8px; }
-        .btn-edit { padding: 6px 15px; border-radius: 8px; border: 1.5px solid #90caf9; background: #e8f4fd; color: #1565c0; font-size: 13px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.14s; display: flex; align-items: center; gap: 5px; }
-        .btn-edit:hover { background: #bbdefb; border-color: #42a5f5; transform: translateY(-1px); }
-        .btn-delete { padding: 6px 15px; border-radius: 8px; border: 1.5px solid #ffcdd2; background: #fff5f5; color: #d32f2f; font-size: 13px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.14s; display: flex; align-items: center; gap: 5px; }
-        .btn-delete:hover { background: #ffebee; border-color: #ef9a9a; transform: translateY(-1px); }
+        .action-wrap { display: flex; gap: 8px; }     
 
         /* Mobile card list */
         .dep-mobile-list { display: none; padding: 12px; gap: 10px; flex-direction: column; }
@@ -316,7 +189,6 @@ function DepartmentPage() {
           .dep-table-wrap { display: none; }
           .dep-mobile-list { display: flex; }
           .dep-header { flex-direction: column; align-items: stretch; }
-          .btn-add { justify-content: center; }
           .dep-search-wrap { max-width: 100%; }
           .dep-toolbar { flex-direction: column; align-items: stretch; }
           .dep-footer { flex-direction: column; align-items: center; }
@@ -331,18 +203,10 @@ function DepartmentPage() {
         <div className="dep-wrap">
           <div className="dep-header">
             <div>
-              <div className="dep-title">Quản lý phòng ban</div>
               <div className="dep-subtitle">Danh sách các phòng ban trong hệ thống</div>
             </div>
-            <button className="btn-add" onClick={() => setModal({ mode: "add" })}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
-              Thêm phòng ban
-            </button>
           </div>
 
-          {/* Stats */}
           {!loading && !error && (
               <div className="dep-stats">
                 <div className="stat-chip">
@@ -367,8 +231,6 @@ function DepartmentPage() {
                 )}
               </div>
           )}
-
-          {/* Toolbar */}
           {!loading && !error && (
               <div className="dep-toolbar">
                 <div className="dep-search-wrap">
@@ -429,14 +291,12 @@ function DepartmentPage() {
 
             {!loading && !error && paginated.length > 0 && (
                 <>
-                  {/* Desktop Table */}
                   <div className="dep-table-wrap" style={{ overflowX: "auto" }}>
                     <table className="dep-table">
                       <thead>
                       <tr>
                         <th style={{ width: 72 }}>STT</th>
                         <th>Tên phòng ban</th>
-                        <th style={{ width: 190 }}>Hành động</th>
                       </tr>
                       </thead>
                       <tbody>
@@ -455,29 +315,12 @@ function DepartmentPage() {
                                 <span className="dep-name">{dep.name}</span>
                               </div>
                             </td>
-                            <td>
-                              <div className="action-wrap">
-                                <button className="btn-edit" onClick={() => setModal({ mode: "edit", dep })}>
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                                  </svg>
-                                  Sửa
-                                </button>
-                                <button className="btn-delete" onClick={() => setDeleteTarget(dep)}>
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                                  </svg>
-                                  Xóa
-                                </button>
-                              </div>
-                            </td>
                           </tr>
                       ))}
                       </tbody>
                     </table>
                   </div>
 
-                  {/* Mobile Cards */}
                   <div className="dep-mobile-list">
                     {paginated.map((dep, index) => (
                         <div className="dep-mobile-card" key={dep.id}>
@@ -502,7 +345,6 @@ function DepartmentPage() {
                     ))}
                   </div>
 
-                  {/* Footer */}
                   <div className="dep-footer">
                     <div className="dep-footer__info">
                       Hiển thị <strong>{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)}</strong> trong tổng <strong>{filtered.length}</strong> phòng ban
@@ -514,22 +356,6 @@ function DepartmentPage() {
             )}
           </div>
         </div>
-
-        {modal && (
-            <DepartmentModal
-                mode={modal.mode}
-                initial={modal.dep}
-                onClose={() => setModal(null)}
-                onSaved={() => { setModal(null); fetchDepartments(); }}
-            />
-        )}
-        {deleteTarget && (
-            <ConfirmDelete
-                dep={deleteTarget}
-                onClose={() => setDeleteTarget(null)}
-                onDeleted={() => { setDeleteTarget(null); fetchDepartments(); }}
-            />
-        )}
       </>
   );
 }

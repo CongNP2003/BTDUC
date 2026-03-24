@@ -1,34 +1,47 @@
 import { useState } from "react";
 import { loginApi } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
- 
+
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
- 
+    const [errorMessage, setErrorMessage] = useState(""); // ✅ Thêm state này
+
     const navigate = useNavigate();
- 
+
     const handleLogin = async () => {
         setLoading(true);
+        setErrorMessage("");
+
         try {
             const res = await loginApi({ username, password });
             const token = res.result;
-            if (!token) throw new Error("Không nhận được token");
+            const role = res.message;
+
+            if (!token || token.toLowerCase() === "mật khẩu sai") {
+                setErrorMessage("Sai tài khoản hoặc mật khẩu");
+                return;
+            }
+
             localStorage.setItem("token", token);
-            navigate("/admin");
-        } catch (error) {
-            console.error("Login error:", error);
-            alert("Sai tài khoản hoặc mật khẩu");
+
+            if (role.toLowerCase() === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/user");
+            }
+        } catch (err) {
+            setErrorMessage("Có lỗi xảy ra, vui lòng thử lại");
         } finally {
             setLoading(false);
         }
     };
- 
+
     const handleKeyDown = (e) => {
         if (e.key === "Enter") handleLogin();
     };
- 
+
     return (
         <>
             <style>{`
@@ -143,6 +156,40 @@ function Login() {
                     color: #90bcd9;
                     pointer-events: none;
                 }
+
+                /* ✅ Thêm style cho error box */
+                .error-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #fff5f5;
+                    border: 1.5px solid #ffcdd2;
+                    border-radius: 10px;
+                    padding: 10px 14px;
+                    margin-bottom: 16px;
+                    color: #e53935;
+                    font-size: 13.5px;
+                    font-weight: 600;
+                    animation: shakeX 0.4s ease;
+                }
+
+                @keyframes shakeX {
+                    0%, 100% { transform: translateX(0); }
+                    20%       { transform: translateX(-6px); }
+                    40%       { transform: translateX(6px); }
+                    60%       { transform: translateX(-4px); }
+                    80%       { transform: translateX(4px); }
+                }
+
+                /* ✅ Input đổi màu border khi có lỗi */
+                .login-input.input-error {
+                    border-color: #ef9a9a;
+                    background: #fff8f8;
+                }
+                .login-input.input-error:focus {
+                    border-color: #e53935;
+                    box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.10);
+                }
  
                 .login-input {
                     width: 100%;
@@ -198,44 +245,42 @@ function Login() {
                     opacity: 0.7;
                     cursor: not-allowed;
                 }
- 
-                .login-footer {
-                    margin-top: 24px;
-                    text-align: center;
-                    font-size: 13px;
-                    color: #9db4cc;
-                }
- 
-                .login-footer a {
-                    color: #42a5f5;
-                    text-decoration: none;
-                    font-weight: 600;
-                }
+
             `}</style>
- 
+
             <div className="login-root">
                 <div className="login-card">
                     <div className="login-logo">
                         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
                     </div>
- 
+
                     <div className="login-title">Chào mừng trở lại</div>
                     <div className="login-subtitle">Đăng nhập để tiếp tục quản lý hệ thống</div>
- 
+
+                    {/* ✅ Hiển thị lỗi ở đây, bên trên các field */}
+                    {errorMessage && (
+                        <div className="error-box">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                            {errorMessage}
+                        </div>
+                    )}
+
                     <div className="field-wrap">
                         <label className="field-label">Tài khoản</label>
                         <span className="field-icon">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                         </span>
                         <input
-                            className="login-input"
+                            className={`login-input${errorMessage ? " input-error" : ""}`}
                             placeholder="Nhập tên đăng nhập"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e) => { setUsername(e.target.value); setErrorMessage(""); }}
                             onKeyDown={handleKeyDown}
                         />
                     </div>
- 
+
                     <div className="field-wrap">
                         <label className="field-label">Mật khẩu</label>
                         <span className="field-icon">
@@ -243,25 +288,21 @@ function Login() {
                         </span>
                         <input
                             type="password"
-                            className="login-input"
+                            className={`login-input${errorMessage ? " input-error" : ""}`}
                             placeholder="Nhập mật khẩu"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => { setPassword(e.target.value); setErrorMessage(""); }}
                             onKeyDown={handleKeyDown}
                         />
                     </div>
- 
+
                     <button className="login-btn" onClick={handleLogin} disabled={loading}>
                         {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                     </button>
- 
-                    <div className="login-footer">
-                        Quên mật khẩu? <a href="#">Liên hệ quản trị viên</a>
-                    </div>
                 </div>
             </div>
         </>
     );
 }
- 
+
 export default Login;

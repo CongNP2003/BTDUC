@@ -182,52 +182,6 @@ function EmployeeModal({ mode, initial, departments, onClose, onSaved }) {
   );
 }
 
-/* ─── Confirm Delete ─── */
-function ConfirmDelete({ emp, onClose, onDeleted }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const handleDelete = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await deleteEmployee(emp.id);
-      onDeleted();
-    } catch {
-      setError("Xóa thất bại, vui lòng thử lại");
-      setLoading(false);
-    }
-  };
-  return (
-      <>
-        <div className="modal-backdrop" onClick={onClose} />
-        <div className="modal-box modal-box--sm" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <div className="modal-title">Xác nhận xóa</div>
-            <button className="modal-close" onClick={onClose}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              </svg>
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="confirm-icon">🗑️</div>
-            <div className="confirm-msg">
-              Bạn có chắc muốn xóa nhân viên <strong>"{emp.username}"</strong> không?
-              <br /><span style={{ fontSize: 13, color: "#94afc8" }}>Hành động này không thể hoàn tác.</span>
-            </div>
-            {error && <div className="field-error" style={{ marginTop: 10, textAlign: "center" }}>{error}</div>}
-          </div>
-          <div className="modal-footer">
-            <button className="btn-cancel" onClick={onClose} disabled={loading}>Hủy</button>
-            <button className="btn-danger" onClick={handleDelete} disabled={loading}>
-              {loading ? <span className="btn-spinner" /> : "Xóa nhân viên"}
-            </button>
-          </div>
-        </div>
-      </>
-  );
-}
-
 /* ─── Main Page ─── */
 function EmployeePage() {
   const [employees, setEmployees] = useState([]);
@@ -322,8 +276,6 @@ function EmployeePage() {
         .action-wrap { display:flex; gap:8px; }
         .btn-edit { padding:6px 15px; border-radius:8px; border:1.5px solid #90caf9; background:#e8f4fd; color:#1565c0; font-size:13px; font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; transition:all 0.14s; display:flex; align-items:center; gap:5px; }
         .btn-edit:hover { background:#bbdefb; border-color:#42a5f5; transform:translateY(-1px); }
-        .btn-delete { padding:6px 15px; border-radius:8px; border:1.5px solid #ffcdd2; background:#fff5f5; color:#d32f2f; font-size:13px; font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; transition:all 0.14s; display:flex; align-items:center; gap:5px; }
-        .btn-delete:hover { background:#ffebee; border-color:#ef9a9a; transform:translateY(-1px); }
         /* Mobile cards */
         .emp-mobile-list { display:none; padding:12px; gap:10px; flex-direction:column; }
         .emp-mobile-card { background:#fff; border:1.5px solid #e8f2fb; border-radius:14px; padding:14px; box-shadow:0 2px 8px rgba(21,101,192,0.05); }
@@ -429,7 +381,6 @@ function EmployeePage() {
         <div className="emp-wrap">
           <div className="emp-header">
             <div>
-              <div className="emp-title">Quản lý nhân viên</div>
               <div className="emp-subtitle">Danh sách toàn bộ nhân viên trong hệ thống</div>
             </div>
             <button className="btn-add" onClick={() => setModal({ mode: "add" })}>
@@ -567,10 +518,6 @@ function EmployeePage() {
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></svg>
                                   Sửa
                                 </button>
-                                <button className="btn-delete" onClick={() => setDeleteTarget(emp)}>
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
-                                  Xóa
-                                </button>
                               </div>
                             </td>
                           </tr>
@@ -632,13 +579,6 @@ function EmployeePage() {
                 departments={departments}
                 onClose={() => setModal(null)}
                 onSaved={() => { setModal(null); fetchAll(); }}
-            />
-        )}
-        {deleteTarget && (
-            <ConfirmDelete
-                emp={deleteTarget}
-                onClose={() => setDeleteTarget(null)}
-                onDeleted={() => { setDeleteTarget(null); fetchAll(); }}
             />
         )}
       </>

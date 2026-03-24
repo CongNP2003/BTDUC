@@ -3,7 +3,6 @@ import Login from "../pages/Login.jsx";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 import UserLayout from "../layouts/UserLayout.jsx";
  
-// Global theme styles injected once at the router level
 const GlobalStyle = () => (
     <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Lato:wght@300;400;700&display=swap');

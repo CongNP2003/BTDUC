@@ -2,6 +2,8 @@ package com.example.DucQLNV.controller;
 
 import com.example.DucQLNV.dto.request.UserRequest;
 import com.example.DucQLNV.dto.respone.ApiResponse;
+import com.example.DucQLNV.entity.User;
+import com.example.DucQLNV.repository.UserRepository;
 import com.example.DucQLNV.service.AuthService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +19,15 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService service;
+    final UserRepository repo;
 
     @PostMapping("/login")
     public ApiResponse login(@RequestBody UserRequest request) {
+        User user = repo.findByUsername(request.getUsername()).orElseThrow();
         var result =  service.login(request);
         return ApiResponse.builder()
                 .result(result)
+                .message(user.getRole())
                 .build();
 
     }

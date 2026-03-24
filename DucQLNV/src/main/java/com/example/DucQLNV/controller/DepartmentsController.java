@@ -35,9 +35,11 @@ public class DepartmentsController {
     }
 
     @GetMapping("/department")
-    public ApiResponse<List<DepartmentsResponse>> getLisEmployee() {
+    public ApiResponse<List<DepartmentsResponse>> getLisDepartment(
+            @RequestParam(defaultValue = "0") int from,
+            @RequestParam(defaultValue = "10") int size) {
         return ApiResponse.<List<DepartmentsResponse>>builder()
-                .result(service.getAllDepartments())
+                .result(service.getAllDepartments(from, size))
                 .build();
     }
 

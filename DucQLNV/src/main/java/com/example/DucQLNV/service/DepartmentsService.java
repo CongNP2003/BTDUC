@@ -4,11 +4,16 @@ import com.example.DucQLNV.dto.mapper.DepartmentsMapper;
 import com.example.DucQLNV.dto.request.DepartmentsRequest;
 import com.example.DucQLNV.dto.respone.DepartmentsResponse;
 import com.example.DucQLNV.entity.Departments;
+import com.example.DucQLNV.entity.User;
 import com.example.DucQLNV.repository.DepartmentsRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -43,9 +48,15 @@ public class DepartmentsService {
         return mapper.toDepartmentRespone(departments);
     }
 
-    public List<DepartmentsResponse> getAllDepartments (){
-        List<Departments> departments = departmentsRepository.findAll();
-        return departments.stream().map(mapper::toDepartmentRespone).toList();
+    public List<DepartmentsResponse> getAllDepartments (int from, int size){
+        int page = from / size;
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
+        Page<Departments> departments = departmentsRepository.findAll(pageable);
+        return departments.getContent()
+                .stream()
+                .map(mapper::toDepartmentRespone)
+                .toList();
     }
 
     public boolean deleteDepartments (String id){

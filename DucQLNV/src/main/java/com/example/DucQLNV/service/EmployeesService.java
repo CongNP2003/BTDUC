@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -66,7 +67,7 @@ public class EmployeesService {
     }
     public List<EmployeesResponse> getAllEmployees(int from, int size){
         int page = from / size;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
         Page<Employees> employeesPage = employeesRepository.findAll(pageable);
         return employeesPage.getContent().stream().map(employessMapper::toEmployesRespone).toList();
     }

@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,18 +28,21 @@ public class AuthService {
     public String login(UserRequest request) {
         User user = repo.findByUsername(request.getUsername()).orElseThrow();
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
-           return ("mật khẩu sai");
+            return ("mật khẩu sai");
         }
         return jwtService.generateToken(user.getUsername());
     }
+
     public UserRequest register(UserRequest req) {
         if (repo.existsByUsername(req.getUsername())) {
             throw new RuntimeException("User exists");
         }
         User user = User.builder().username(req.getUsername())
-                        .password(encoder.encode(req.getPassword()))
-                        .role("USER")
-                        .build();
+                .password(encoder.encode(req.getPassword()))
+                .role("USER")
+                .createdDate(Instant.now())
+                .lastUpDateTime(Instant.now())
+                .build();
         repo.save(user);
         return userMapper.toUserResponse(user);
     }

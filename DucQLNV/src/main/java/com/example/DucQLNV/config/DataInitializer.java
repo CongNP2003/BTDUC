@@ -7,6 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -18,10 +20,11 @@ public class DataInitializer implements CommandLineRunner {
         if (!repo.existsByUsername("admin")) {
             User admin = User.builder()
                     .username("admin")
-                    .password(encoder
-                            .encode("123"))
-                            .role("ADMIN")
-                            .build();
+                    .password(encoder.encode("123"))
+                    .role("ADMIN")
+                    .createdDate(Instant.now())
+                    .lastUpDateTime(Instant.now())
+                    .build();
             repo.save(admin);
         }
     }

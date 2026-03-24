@@ -20,52 +20,34 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    // ✅ mã hóa password
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Security chính
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
-                // ✅ BẮT BUỘC để React gọi API
                 .cors(cors -> {})
-
-                // ✅ tắt csrf
                 .csrf(csrf -> csrf.disable())
-
-                // ✅ phân quyền
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-                // ✅ JWT filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
-
-    // ✅ cấu hình CORS cho React localhost:3000
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
-
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
-
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }
